@@ -40,7 +40,7 @@ async function run() {
 			res.send(product);
 		});
 
-		//put method (update stock)
+		//put method (update delivered stock)
 		app.put("/delivered/:id", async (req, res) => {
 			const id = req.params.id;
 			const updateProduct = req.body;
@@ -56,7 +56,26 @@ async function run() {
 				updateDoc,
 				options
 			);
-			res.send(result);
+			res.send({ success: true, message: "Delivered Success!" });
+		});
+
+		//put method (update add stock )
+		app.put("/addstock/:id", async (req, res) => {
+			const id = req.params.id;
+			const updateProduct = req.body;
+			const filter = { _id: ObjectId(id) };
+			const options = { upsert: true };
+			const updateDoc = {
+				$set: {
+					stock: updateProduct.stock,
+				},
+			};
+			const result = await productCollection.updateOne(
+				filter,
+				updateDoc,
+				options
+			);
+			res.send({ success: true, message: "Stock Add Success!" });
 		});
 	} finally {
 		// await client.close();
