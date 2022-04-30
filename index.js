@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
@@ -23,11 +23,19 @@ async function run() {
 			.db("warehouseManagementDB")
 			.collection("products");
 
+		// get method (all products get)
 		app.get("/products", async (req, res) => {
 			const query = {};
 			const cursor = productCollection.find(query);
 			const services = await cursor.toArray();
 			res.send(services);
+		});
+
+		app.get("/product/:id", async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: ObjectId(id) };
+			const product = await productCollection.findOne(query);
+			res.send(product);
 		});
 	} finally {
 		// await client.close();
