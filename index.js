@@ -36,9 +36,27 @@ async function run() {
 			const id = req.params.id;
 			console.log(id);
 			const query = { _id: ObjectId(id) };
-			// const query = { id };
 			const product = await productCollection.findOne(query);
 			res.send(product);
+		});
+
+		//put method (update stock)
+		app.put("/delivered/:id", async (req, res) => {
+			const id = req.params.id;
+			const updateProduct = req.body;
+			const filter = { _id: ObjectId(id) };
+			const options = { upsert: true };
+			const updateDoc = {
+				$set: {
+					stock: updateProduct.stock,
+				},
+			};
+			const result = await productCollection.updateOne(
+				filter,
+				updateDoc,
+				options
+			);
+			res.send(result);
 		});
 	} finally {
 		// await client.close();
