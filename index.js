@@ -34,7 +34,14 @@ async function run() {
 		// get method (single product get)
 		app.get("/inventory/:id", async (req, res) => {
 			const id = req.params.id;
-			console.log(id);
+			const query = { _id: ObjectId(id) };
+			const product = await productCollection.findOne(query);
+			res.send(product);
+		});
+
+		// get method (single product get for update)
+		app.get("/product/:id", async (req, res) => {
+			const id = req.params.id;
 			const query = { _id: ObjectId(id) };
 			const product = await productCollection.findOne(query);
 			res.send(product);
@@ -78,12 +85,43 @@ async function run() {
 			res.send({ success: true, message: "Stock Add Success!" });
 		});
 
+		//put method (update item)
+		app.put("/product/:id", async (req, res) => {
+			const id = req.params.id;
+			const updateProduct = req.body;
+			const filter = { _id: ObjectId(id) };
+			const options = { upsert: true };
+			const updateDoc = {
+				$set: {
+					name: updateProduct.name,
+					price: updateProduct.price,
+					stock: updateProduct.stock,
+					suppliername: updateProduct.suppliername,
+					img: updateProduct.img,
+					quote: updateProduct.quote,
+				},
+			};
+			const updateeProduct = await productCollection.updateOne(
+				filter,
+				updateDoc,
+				options
+			);
+			res.send({ success: true, message: "Product Update Success!" });
+		});
+
 		//post method (new product add)
 		app.post("/product", async (req, res) => {
 			const product = req.body;
-			console.log(product);
 			const result = await productCollection.insertOne(product);
 			res.send({ success: true, message: "Product Add Success!" });
+		});
+
+		//delete method (Product delete)
+		app.delete("/product/:id", async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: ObjectId(id) };
+			const result = await productCollection.deleteOne(query);
+			res.send({ success: true, message: "Product Delete Success!" });
 		});
 	} finally {
 		// await client.close();
