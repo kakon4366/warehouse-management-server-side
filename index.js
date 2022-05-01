@@ -77,6 +77,14 @@ async function run() {
 			);
 			res.send({ success: true, message: "Stock Add Success!" });
 		});
+
+		//post method (new product add)
+		app.post("/product", async (req, res) => {
+			const product = req.body;
+			console.log(product);
+			const result = await productCollection.insertOne(product);
+			res.send({ success: true, message: "Product Add Success!" });
+		});
 	} finally {
 		// await client.close();
 	}
