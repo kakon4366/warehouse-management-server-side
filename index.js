@@ -31,6 +31,19 @@ async function run() {
 			res.send(services);
 		});
 
+		//get Method (Product get by limit)
+		app.get("/productsList", async (req, res) => {
+			const page = parseInt(req.query.page);
+			const limit = parseInt(req.query.limit);
+			const query = {};
+			const cursor = productCollection.find(query);
+			const result = await cursor
+				.skip(page * limit)
+				.limit(limit)
+				.toArray();
+			res.send(result);
+		});
+
 		// get method (all my products get)
 		app.get("/myproduct", async (req, res) => {
 			const email = req.query.email;
@@ -55,6 +68,12 @@ async function run() {
 			const query = { _id: ObjectId(id) };
 			const product = await productCollection.findOne(query);
 			res.send(product);
+		});
+
+		//get method (Total product count)
+		app.get("/productsCount", async (req, res) => {
+			const count = await productCollection.estimatedDocumentCount();
+			res.send({ count });
 		});
 
 		//put method (update delivered stock)
