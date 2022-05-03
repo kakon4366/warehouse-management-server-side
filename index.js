@@ -20,7 +20,7 @@ const verifyJWT = (req, res, next) => {
 		if (err) {
 			res.status(403).send({ message: "Forbidden Access!" });
 		}
-		console.log("decoded", decoded);
+		// console.log("decoded", decoded);
 		req.decoded = decoded;
 		next();
 	});
