@@ -72,7 +72,7 @@ async function run() {
 
 		// get method (all my products get)
 		app.get("/myproduct", verifyJWT, async (req, res) => {
-			const decodedEmail = req.decoded?.email;
+			const decodedEmail = req.decoded.email;
 			const email = req.query.email;
 			if (email === decodedEmail) {
 				const query = { email };
