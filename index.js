@@ -1,6 +1,7 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -8,6 +9,22 @@ const port = process.env.PORT || 5000;
 //middleware
 app.use(cors());
 app.use(express.json());
+
+const verifyJWT = (req, res, next) => {
+	const authHeader = req.headers.authorization;
+	if (!authHeader) {
+		res.status(401).send({ message: "Unauthorized Access!" });
+	}
+	const token = authHeader.split(" ")[1];
+	jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+		if (err) {
+			res.status(403).send({ message: "Forbidden Access!" });
+		}
+		console.log("decoded", decoded);
+		req.decoded = decoded;
+		next();
+	});
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.fw803.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -22,6 +39,15 @@ async function run() {
 		const productCollection = client
 			.db("warehouseManagementDB")
 			.collection("products");
+
+		//AUTH
+		app.post("/signin", async (req, res) => {
+			const user = req.body;
+			const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {
+				expiresIn: "1d",
+			});
+			res.send({ accessToken });
+		});
 
 		// get method (all products get)
 		app.get("/products", async (req, res) => {
@@ -45,13 +71,17 @@ async function run() {
 		});
 
 		// get method (all my products get)
-		app.get("/myproduct", async (req, res) => {
+		app.get("/myproduct", verifyJWT, async (req, res) => {
+			const decodedEmail = req.decoded.email;
 			const email = req.query.email;
-
-			const query = { email };
-			const cursor = productCollection.find(query);
-			const services = await cursor.toArray();
-			res.send(services);
+			if (email === decodedEmail) {
+				const query = { email };
+				const cursor = productCollection.find(query);
+				const services = await cursor.toArray();
+				res.send(services);
+			} else {
+				res.status(403).send({ message: "Forbidden Access!" });
+			}
 		});
 
 		// get method (single product get)
