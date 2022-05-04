@@ -22,7 +22,6 @@ function verifyJWT(req, res, next) {
 		if (err) {
 			return res.status(403).send({ message: "Forbidden Access!" });
 		}
-		console.log("decoded", decoded);
 		req.decoded = decoded;
 		next();
 	});
@@ -76,7 +75,6 @@ async function run() {
 		app.get("/myproduct", verifyJWT, async (req, res) => {
 			const decodedEmail = req.decoded.email;
 			const email = req.query.email;
-			console.log("DecodedEmail...", decodedEmail);
 			if (email === decodedEmail) {
 				const query = { email };
 				const cursor = productCollection.find(query);
@@ -190,7 +188,8 @@ async function run() {
 	}
 }
 run().catch(console.dir);
-// root server
+
+// root server link
 app.get("/", (req, res) => {
 	res.send("Warehouse Management server is running!");
 });
